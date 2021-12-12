@@ -44,3 +44,13 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+/*
+    What client need to be handle
+*/
+
+## Login user
+## Register user
+## If user login successfully login moved to game clinet
+## Game client provide login and logout function and running game
+## web socket only for login user

@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { sendData } from "../../Util/dataService";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
+
+//css only
+import UserViewStyle from "./UserView.module.css";
 //Not needed at global state
 export interface IFUser
 {
@@ -10,9 +13,10 @@ export interface IFUser
     Email:string
 }
 
+
 // Add Login view
 export const LoginView=()=>{
-    return <div>
+    return <div className={UserViewStyle.loginViewhidden}>
         <span>Login view</span>
         <div>User name:<input type="text"></input></div>
         <div>Password:<input type="text"></input></div>
@@ -47,7 +51,7 @@ export const RegisterView=()=>{
       })
     }
     return (
-        <div>
+        <div className={UserViewStyle.registerViewshow}>
         <div>User Name : <input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setUserName(e.target.value);
 

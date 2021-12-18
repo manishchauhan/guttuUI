@@ -1,0 +1,19 @@
+
+.loginViewhidden
+{
+    display: none;
+}
+.loginViewshow
+{
+    display: block;
+}
+
+.registerViewhidden
+{
+    display: none;
+}
+
+.registerViewshow
+{
+    display: block
+}

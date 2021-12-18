@@ -1,4 +1,4 @@
-//
+// Fetech data
 export async function sendData(input: RequestInfo, init?: RequestInit)
 {
     const response = await fetch(input,init);

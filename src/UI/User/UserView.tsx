@@ -1,15 +1,33 @@
 import { useState } from "react"
 import { sendData } from "../../Util/dataService";
+import { IFTab, TabBarView } from "./TabBar/TabBarView";
 //Not needed at global state
-export interface User
+export interface IFUser
 {
     UserId?:number;
     UserName:string,
     Password:string,
     Email:string
 }
+
+// Add Login view
+export const LoginView=()=>{
+    return <div>
+        <span>Login view</span>
+        <div>User name:<input type="text"></input></div>
+        <div>Password:<input type="text"></input></div>
+        <div><button>Login</button></div>
+    </div>
+}
+//tab data
+const tabArray:Array<IFTab>=[
+    {id:0,label:"Login"},
+    {id:1,label:"Register"}
+] ;
+
+
 // User View Register a new User
-export const UserView=()=>{
+export const RegisterView=()=>{
     const [UserName,setUserName]=useState(``);
     const [Password,setPassword]=useState(``);
     const [Email,setEmail]=useState(``);
@@ -47,3 +65,14 @@ export const UserView=()=>{
     </div>
     )
 }
+//User View Combine mutiple views
+export const UserView=()=>{
+   
+    return <div>
+        <TabBarView tabs={tabArray}></TabBarView>
+        <LoginView></LoginView>
+        <RegisterView></RegisterView>
+    </div>
+}
+
+

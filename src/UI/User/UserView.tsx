@@ -20,7 +20,9 @@ export const LoginView=()=>{
         <span>Login view</span>
         <div>User name:<input type="text"></input></div>
         <div>Password:<input type="text"></input></div>
-        <div><button>Login</button></div>
+        <div><button onClick={()=>{
+            console.log("some login try");
+        }}>Login</button></div>
     </div>
 }
 //tab data

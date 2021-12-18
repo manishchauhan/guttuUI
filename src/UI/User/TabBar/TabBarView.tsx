@@ -12,7 +12,7 @@ export interface IFTabBarProps
 
 export  const TabBarView=(props:IFTabBarProps)=>{
     return <div className={TabBarStyle.tab}>{props.tabs.map((tab)=>{
-        return <button key={tab.id} className={TabBarStyle.tablinks} onClick={()=>{
+        return <button key={tab.id} className={TabBarStyle.active} onClick={()=>{
             console.log("some action")
         }}>{tab.label}</button>
     })}</div>

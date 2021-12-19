@@ -1,4 +1,5 @@
 
+import { CallbackFunctionVariadic } from "../../../Util/Others";
 import TabBarStyle from "./TabBarStyle.module.css";
 export interface IFTab
 {
@@ -8,12 +9,13 @@ export interface IFTab
 export interface IFTabBarProps
 {
     tabs:Array<IFTab>
+    callBack:CallbackFunctionVariadic
 }
 
 export  const TabBarView=(props:IFTabBarProps)=>{
     return <div className={TabBarStyle.tab}>{props.tabs.map((tab)=>{
         return <button key={tab.id} className={TabBarStyle.active} onClick={()=>{
-            console.log("some action")
+            props.callBack(tab.id)
         }}>{tab.label}</button>
     })}</div>
 }

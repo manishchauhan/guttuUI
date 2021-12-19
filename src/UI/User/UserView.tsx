@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { sendData } from "../../Util/dataService";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
 
@@ -8,20 +8,42 @@ import UserViewStyle from "./UserView.module.css";
 export interface IFUser
 {
     UserId?:number;
-    UserName:string,
-    Password:string,
-    Email:string
+    UserName?:string,
+    Password?:string,
+    Email?:string,
+    pageState?:number
 }
 
 
 // Add Login view
-export const LoginView=()=>{
-    return <div className={UserViewStyle.loginViewhidden}>
+export const LoginView=(props:IFUser)=>{
+      const [userName,setuserName]=useState(``);
+      const [passWord,setpassWord]=useState(``);
+      const [pageState,setPageState]=useState(props.pageState);
+
+      function  loginUser() {
+          if(userName===`` || passWord===``)
+          {
+              console.log("username and password can't be empty");
+              return;
+          }
+      }
+      useEffect(()=>{
+    
+        setPageState(props.pageState)
+       
+    },[props.pageState])
+    return <div className={pageState===0?UserViewStyle.loginViewshow:UserViewStyle.loginViewhidden
+    }>
         <span>Login view</span>
-        <div>User name:<input type="text"></input></div>
-        <div>Password:<input type="text"></input></div>
+        <div>User name:<input type="text" id="username" name="username" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+            setuserName(e.target.value);
+        }}></input></div>
+        <div>Password:<input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+            setpassWord(e.target.value);
+        }}></input></div>
         <div><button onClick={()=>{
-            console.log("some login try");
+           loginUser();
         }}>Login</button></div>
     </div>
 }
@@ -33,10 +55,16 @@ const tabArray:Array<IFTab>=[
 
 
 // User View Register a new User
-export const RegisterView=()=>{
+export const RegisterView=(props:IFUser)=>{
+    const [pageState,setPageState]=useState(props.pageState)
     const [UserName,setUserName]=useState(``);
     const [Password,setPassword]=useState(``);
     const [Email,setEmail]=useState(``);
+    useEffect(()=>{
+      
+        setPageState(props.pageState)
+ 
+    },[props.pageState])
     function submitData()
     {
        const user={UserName:UserName,Password:Password,Email:Email};
@@ -53,7 +81,7 @@ export const RegisterView=()=>{
       })
     }
     return (
-        <div className={UserViewStyle.registerViewshow}>
+        <div className={pageState===1?UserViewStyle.registerViewshow:UserViewStyle.registerViewhidden}>
         <div>User Name : <input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setUserName(e.target.value);
 
@@ -72,12 +100,19 @@ export const RegisterView=()=>{
     )
 }
 //User View Combine mutiple views
-export const UserView=()=>{
-   
+export const UserView=(props:IFUser)=>{
+    const [homePageState,setHomePageState]=useState(1);
+    useEffect(()=>{
+        setHomePageState(homePageState);
+      
+    },[homePageState])
     return <div>
-        <TabBarView tabs={tabArray}></TabBarView>
-        <LoginView></LoginView>
-        <RegisterView></RegisterView>
+        <TabBarView callBack={(id)=>{
+          setHomePageState(id);
+     
+        }} tabs={tabArray}></TabBarView>
+        <LoginView pageState={homePageState}></LoginView>
+        <RegisterView  pageState={homePageState}></RegisterView>
     </div>
 }
 

@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react"
+import { lazy, Suspense, useEffect, useState } from "react"
 import { sendData } from "../../Util/dataService";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
+//lazy load gamevie
 
 //css only
 import UserViewStyle from "./UserView.module.css";
 //Not needed at global state
+
+const GameViewInstance = lazy(() =>
+  import("../User/Game/GameView").then((module) => ({
+    default: module.GameView,
+  }))
+);
 export interface IFUser
 {
     UserId?:number;
@@ -15,12 +22,13 @@ export interface IFUser
 }
 
 
+
 // Add Login view
 export const LoginView=(props:IFUser)=>{
       const [userName,setuserName]=useState(``);
       const [passWord,setpassWord]=useState(``);
       const [pageState,setPageState]=useState(props.pageState);
-
+      
       function  loginUser() {
           if(userName===`` || passWord===``)
           {
@@ -65,19 +73,15 @@ export const RegisterView=(props:IFUser)=>{
         setPageState(props.pageState)
  
     },[props.pageState])
-    function submitData()
+    async function submitData()
     {
        const user={UserName:UserName,Password:Password,Email:Email};
-       sendData(`http://localhost:4040/user/add`,{
+       await sendData(`http://localhost:4040/user/add`,{
         method: "POST",
         headers: {
           'Content-type': 'application/json'
         },
         body: JSON.stringify(user)
-      }).then((data)=>{
-          console.log("the data is",data)
-      }).catch(e=>{
-          console.log(e);
       })
     }
     return (
@@ -113,6 +117,9 @@ export const UserView=(props:IFUser)=>{
         }} tabs={tabArray}></TabBarView>
         <LoginView pageState={homePageState}></LoginView>
         <RegisterView  pageState={homePageState}></RegisterView>
+        <Suspense fallback={<div></div>}>
+            <GameViewInstance></GameViewInstance>
+        </Suspense>
     </div>
 }
 

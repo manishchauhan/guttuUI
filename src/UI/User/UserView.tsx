@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react"
 import { sendData } from "../../Util/dataService";
+import { CallbackFunctionVariadic } from "../../Util/Others";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
 //lazy load gamevie
 
@@ -8,7 +9,7 @@ import UserViewStyle from "./UserView.module.css";
 //Not needed at global state
 
 const GameViewInstance = lazy(() =>
-  import("../User/Game/GameView").then((module) => ({
+  import("./GameView/GameView").then((module) => ({
     default: module.GameView,
   }))
 );
@@ -19,6 +20,7 @@ export interface IFUser
     Password?:string,
     Email?:string,
     pageState?:number
+    sucessCallBack?:CallbackFunctionVariadic
 }
 
 
@@ -28,13 +30,36 @@ export const LoginView=(props:IFUser)=>{
       const [userName,setuserName]=useState(``);
       const [passWord,setpassWord]=useState(``);
       const [pageState,setPageState]=useState(props.pageState);
-      
+      const [errorMsg,seterrorMsg]=useState(``);
+      async function tryLoginUser()
+      {
+         const user={UserName:userName,Password:passWord};
+         const result=await sendData(`http://localhost:4040/user/login`,{
+          method: "POST",
+          headers: {
+            'Content-type': 'application/json'
+          },
+          body: JSON.stringify(user)
+        })
+        if(result.errorCode===208)
+         {
+          seterrorMsg(result.message)
+          return;
+      }
+        if(props.sucessCallBack)
+        {
+            seterrorMsg('')
+            props.sucessCallBack(true);
+        }
+  
+      }
       function  loginUser() {
           if(userName===`` || passWord===``)
           {
               console.log("username and password can't be empty");
               return;
           }
+          tryLoginUser();
       }
       useEffect(()=>{
     
@@ -43,6 +68,7 @@ export const LoginView=(props:IFUser)=>{
     },[props.pageState])
     return <div className={pageState===0?UserViewStyle.loginViewshow:UserViewStyle.loginViewhidden
     }>
+        <div>{errorMsg}</div>
         <span>Login view</span>
         <div>User name:<input type="text" id="username" name="username" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setuserName(e.target.value);
@@ -68,6 +94,7 @@ export const RegisterView=(props:IFUser)=>{
     const [UserName,setUserName]=useState(``);
     const [Password,setPassword]=useState(``);
     const [Email,setEmail]=useState(``);
+    const [errorMsg,seterrorMsg]=useState(``);
     useEffect(()=>{
       
         setPageState(props.pageState)
@@ -76,21 +103,34 @@ export const RegisterView=(props:IFUser)=>{
     async function submitData()
     {
        const user={UserName:UserName,Password:Password,Email:Email};
-       await sendData(`http://localhost:4040/user/add`,{
+       const result=await sendData(`http://localhost:4040/user/add`,{
         method: "POST",
         headers: {
           'Content-type': 'application/json'
         },
         body: JSON.stringify(user)
       })
+   
+      if(result.errorCode===207)
+      {
+          seterrorMsg(result.message)
+          return;
+      }
+      if(props.sucessCallBack)
+      {
+          props.sucessCallBack(true);
+      }
+    
     }
     return (
+
         <div className={pageState===1?UserViewStyle.registerViewshow:UserViewStyle.registerViewhidden}>
+        <div>{errorMsg}</div>
         <div>User Name : <input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setUserName(e.target.value);
 
         }}></input></div>
-        <div>Password : <input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+        <div>Password : <input type="password" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
               setPassword(e.target.value);
 
         }} ></input></div>
@@ -105,18 +145,22 @@ export const RegisterView=(props:IFUser)=>{
 }
 //User View Combine mutiple views
 export const UserView=(props:IFUser)=>{
+
     const [homePageState,setHomePageState]=useState(1);
     useEffect(()=>{
         setHomePageState(homePageState);
       
     },[homePageState])
     return <div>
+      
         <TabBarView callBack={(id)=>{
           setHomePageState(id);
      
         }} tabs={tabArray}></TabBarView>
         <LoginView pageState={homePageState}></LoginView>
-        <RegisterView  pageState={homePageState}></RegisterView>
+        <RegisterView sucessCallBack={()=>{
+             setHomePageState(0)
+        }} pageState={homePageState}></RegisterView>
         <Suspense fallback={<div></div>}>
             <GameViewInstance></GameViewInstance>
         </Suspense>

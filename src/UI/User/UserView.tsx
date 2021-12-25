@@ -73,7 +73,7 @@ export const LoginView=(props:IFUser)=>{
         <div>User name:<input type="text" id="username" name="username" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setuserName(e.target.value);
         }}></input></div>
-        <div>Password:<input type="text" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+        <div>Password:<input type="password"  onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
             setpassWord(e.target.value);
         }}></input></div>
         <div><button onClick={()=>{

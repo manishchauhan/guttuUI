@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react"
 import { sendData } from "../../Util/dataService";
-import { CallbackFunctionVariadic } from "../../Util/Others";
+import { CallbackFunctionVariadic, LocalDataStorage } from "../../Util/Others";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
 //lazy load gamevie
 
@@ -22,7 +22,19 @@ export interface IFUser
     pageState?:number
     sucessCallBack?:CallbackFunctionVariadic
 }
-
+export interface IFAuthData
+{
+    email?:string
+    isLogin?:boolean
+    user?:string
+}
+export interface IFAuthTokenAndData
+{
+    authToken:string
+    AuthData:IFAuthData
+    errorCode?:number
+    message?:string
+}
 
 
 // Add Login view
@@ -34,7 +46,7 @@ export const LoginView=(props:IFUser)=>{
       async function tryLoginUser()
       {
          const user={UserName:userName,Password:passWord};
-         const result=await sendData(`http://localhost:4040/user/login`,{
+         const result:IFAuthTokenAndData=await sendData(`http://localhost:4040/user/login`,{
           method: "POST",
           headers: {
             'Content-type': 'application/json'
@@ -43,13 +55,16 @@ export const LoginView=(props:IFUser)=>{
         })
         if(result.errorCode===208)
          {
-          seterrorMsg(result.message)
+          seterrorMsg(result.message??"opps...")
           return;
-      }
+         }
+         localStorage.setItem(`authToken`,result.authToken);
+     
         if(props.sucessCallBack)
         {
             seterrorMsg('')
-            props.sucessCallBack(true);
+            props.sucessCallBack(result.AuthData);
+  
         }
   
       }
@@ -145,7 +160,7 @@ export const RegisterView=(props:IFUser)=>{
 }
 //User View Combine mutiple views
 export const UserView=(props:IFUser)=>{
-
+    const [isLogin,setisLogin]=useState(LocalDataStorage.Auth());
     const [homePageState,setHomePageState]=useState(1);
     useEffect(()=>{
         setHomePageState(homePageState);
@@ -157,12 +172,18 @@ export const UserView=(props:IFUser)=>{
           setHomePageState(id);
      
         }} tabs={tabArray}></TabBarView>
-        <LoginView pageState={homePageState}></LoginView>
+        <LoginView sucessCallBack={(authData:IFAuthData)=>{
+     
+            setisLogin(authData.isLogin as boolean);
+        }} pageState={homePageState}></LoginView>
         <RegisterView sucessCallBack={()=>{
              setHomePageState(0)
         }} pageState={homePageState}></RegisterView>
         <Suspense fallback={<div></div>}>
-            <GameViewInstance></GameViewInstance>
+            {
+                isLogin?<GameViewInstance></GameViewInstance>:<div>Please Login to play the games...</div>
+            }
+            
         </Suspense>
     </div>
 }

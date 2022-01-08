@@ -47,5 +47,12 @@ export class LocalDataStorage
       }
       return this.authData.isLogin?true:false;
     }
+    static getTokenFromCookie(key:string):string
+    {
+        return `Bearer ${document.cookie
+        .split(`; `)
+        .find((row) => row.startsWith("accessToken"))
+        ?.split("=")[1] as string}`;
+    }
 }
 

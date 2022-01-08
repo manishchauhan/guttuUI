@@ -6,6 +6,19 @@ export class LocalDataStorage
 {
     static authData:IFAuthData|undefined=undefined;
     
+    static clearObject<T>(key:string)
+    {
+        if(window.localStorage)
+        {
+            try
+            {
+               localStorage.removeItem('key')
+            }catch(e)
+            {
+                throw new Error(`Some problem is with local storage${e}`);
+            }
+        }
+    }
      static setObject<T>(key:string,value:T)
     {
        if(window.localStorage)

@@ -210,7 +210,7 @@ export const RegisterView = (props: IFUser) => {
 export const UserView = (props: IFUser) => {
   const [isLogin, setisLogin] = useState(LocalDataStorage.Auth());
   const [homePageState, setHomePageState] = useState(1);
-  const [authData, setAuthData] = useState<IFAuthData>();
+  const [authData, setAuthData] = useState<IFAuthData>({});
   useEffect(() => {
     const accessToken =
       LocalDataStorage.getTokenFromCookie(`accessToken`)?.split(" ")[1];
@@ -249,7 +249,13 @@ export const UserView = (props: IFUser) => {
       <TabBarView
         isLogin={isLogin}
         callBack={(id) => {
-          setHomePageState(id);
+          console.log("id", id);
+          if (id === 2) {
+            // clear data set login to false
+            setisLogin(false);
+            setAuthData({});
+          }
+          setHomePageState(0);
         }}
         tabs={tabArray}
       ></TabBarView>

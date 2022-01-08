@@ -20,7 +20,7 @@ export async function fetchDataAuth(
   url: string,
   header: HeadersInit = {
     "Content-Type": "application/json",
-    Authorization: LocalDataStorage.getTokenFromCookie(`accessToken`),
+    Authorization: LocalDataStorage.getTokenFromCookie(`accessToken`) as string,
   }
 ) {
   try {

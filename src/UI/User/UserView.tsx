@@ -45,7 +45,6 @@ export const LoginView = (props: IFUser) => {
 
   async function tryLoginUser() {
     const user = { UserName: userName, Password: passWord };
-
     const result: IFAuthTokenAndData = await sendData(
       `http://localhost:4040/user/login`,
       {
@@ -65,6 +64,7 @@ export const LoginView = (props: IFUser) => {
     }
 
     if (props.sucessCallBack) {
+      LocalDataStorage.setObject<IFAuthData>("userData", result.AuthData);
       props.sucessCallBack(result.AuthData);
     }
   }
@@ -210,14 +210,26 @@ export const RegisterView = (props: IFUser) => {
 export const UserView = (props: IFUser) => {
   const [isLogin, setisLogin] = useState(LocalDataStorage.Auth());
   const [homePageState, setHomePageState] = useState(1);
+  const [authData, setAuthData] = useState<IFAuthData>();
   useEffect(() => {
-    setHomePageState(homePageState);
-  }, [homePageState]);
+    const accessToken =
+      LocalDataStorage.getTokenFromCookie(`accessToken`)?.split(" ")[1];
+    if (accessToken) {
+      const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
+        "userData"
+      ) as IFAuthData;
+      setAuthData(authData);
+      setisLogin(authData.isLogin as boolean);
+    } else {
+      setHomePageState(homePageState);
+    }
+  }, []);
   function displayLoginOrRegisterView() {
     return (
       <>
         <LoginView
           sucessCallBack={(authData: IFAuthData) => {
+            setAuthData(authData);
             setisLogin(authData.isLogin as boolean);
           }}
           pageState={homePageState}
@@ -246,7 +258,12 @@ export const UserView = (props: IFUser) => {
 
       <Suspense fallback={<div></div>}>
         {isLogin ? (
-          <GameViewInstance></GameViewInstance>
+          <>
+            <div>
+              Welcome user {authData?.user} Email {authData?.email}
+            </div>
+            <GameViewInstance></GameViewInstance>
+          </>
         ) : (
           <div>Please Login to play the games...</div>
         )}

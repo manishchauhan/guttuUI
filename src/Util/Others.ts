@@ -5,6 +5,34 @@ export type CallbackFunctionVariadic = (...args: any[]) => void;
 export class LocalDataStorage
 {
     static authData:IFAuthData|undefined=undefined;
+    
+     static setObject<T>(key:string,value:T)
+    {
+       if(window.localStorage)
+       {
+           try
+           {
+              localStorage.setItem(key,JSON.stringify(value));
+           }catch(e)
+           {
+               throw new Error(`Some problem is with local storage${e}`);
+           }
+       }
+    }
+    static getObject<T>(key:string):T|undefined
+    {
+        if(window.localStorage)
+        {
+            try
+            {
+              const userData=localStorage.getItem(key);
+              return JSON.parse(userData as string) as T;
+            }catch(e)
+            {
+                throw new Error(`Some problem is with local storage${e}`);
+            }
+        }
+    }
     static setItem(key:string,value:string)
     {
        if(window.localStorage)
@@ -47,8 +75,13 @@ export class LocalDataStorage
       }
       return this.authData.isLogin?true:false;
     }
-    static getTokenFromCookie(key:string):string
+    static getTokenFromCookie(key:string):string|undefined
     {
+        const tokenCookie=document.cookie
+        .split(`; `)
+        .find((row) => row.startsWith("accessToken"));
+        if(!tokenCookie)
+            return undefined;
         return `Bearer ${document.cookie
         .split(`; `)
         .find((row) => row.startsWith("accessToken"))

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useState } from "react";
 import { sendData } from "../../Util/dataService";
 import { CallbackFunctionVariadic, LocalDataStorage } from "../../Util/Others";
 import { IFTab, TabBarView } from "./TabBar/TabBarView";
@@ -8,12 +8,7 @@ import { IFTab, TabBarView } from "./TabBar/TabBarView";
 import UserViewStyle from "./UserView.module.css";
 //Not needed at global state
 
-const GameViewInstance = lazy(() =>
-  import("./GameView/GameView").then((module) => ({
-    default: module.GameView,
-  }))
-);
-
+let GameViewInstance: React.FunctionComponent;
 export interface IFUser {
   UserId?: number;
   UserName?: string;
@@ -223,6 +218,11 @@ export const UserView = (props: IFUser) => {
     } else {
       setHomePageState(homePageState);
     }
+    GameViewInstance = lazy(() =>
+      import("./GameView/GameView").then((module) => ({
+        default: module.GameView,
+      }))
+    );
   }, []);
   function displayLoginOrRegisterView() {
     return (

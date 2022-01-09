@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { sendData } from "../../../Util/dataService";
 import {
   CallbackFunctionVariadic,
+  GameAction,
+  IFGame,
   LocalDataStorage,
 } from "../../../Util/Others";
 import TabBarStyle from "./TabBarStyle.module.css";
@@ -14,11 +16,13 @@ export interface IFTabBarProps {
   isLogin: boolean;
   callBack: CallbackFunctionVariadic;
 }
+
 // 1 for register
 // 0 for login
 // 2 for logout
 export const TabBarView = (props: IFTabBarProps) => {
   const [isLogin, setisLogin] = useState(false);
+
   //logout user
   async function logOut() {
     const tokenData = {

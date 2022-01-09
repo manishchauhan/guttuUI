@@ -1,3 +1,6 @@
+
+import { ReactChild, ReactChildren } from "react";
+import { Interface } from "readline";
 import { IFAuthData } from "../UI/User/UserView";
 
 export type CallbackFunctionVariadic = (...args: any[]) => void;
@@ -102,3 +105,38 @@ export class LocalDataStorage
     }
 }
 
+//Mapped table in mysql
+/*
+	1	gameid Primary	int(11)			No	None		AUTO_INCREMENT	Change Change	Drop Drop	
+More More
+	2	gamename	varchar(256)	utf8mb4_general_ci		No	None			Change Change	Drop Drop	
+More More
+	3	gameurl	text	utf8mb4_general_ci		No	None			Change Change	Drop Drop	
+More More
+	4	gamedesc	longtext	utf8mb4_general_ci		No	None			Change Change	Drop Drop	
+More More
+	5	multiplayer	tinyint(1)			No	None			Change Change	Drop Drop	
+More More
+	6	played	bigint(20)			No	None			Change Change	Drop Drop	
+More More
+	7	gameimg	varchar(256)	utf8mb4_general_ci		No	None			Change Change	Drop Drop	
+More More
+*/
+// Game interface holding all game information
+export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL";
+export interface IFGame {
+    gameid?: number | undefined;
+    gamename?: string | undefined;
+    gameurl?: string | undefined;
+    gamedesc?: string | undefined;
+    multiplayer?: boolean;
+    played?: number;
+    gameimg?: string;
+    children?: ReactChild | ReactChildren;
+    callBack?:CallbackFunctionVariadic
+  }
+
+export interface GameAction
+{
+    type:GameActionType
+}

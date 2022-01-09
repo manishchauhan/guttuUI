@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useFetch } from "../../../Util/CustomHokks";
-import { GameAction, IFGame } from "../../../Util/Others";
+import { GameAction, IFGame, IFGameProps } from "../../../Util/Others";
 import GameStyle from "./GameStyle.module.css";
 
 const gameSelectReducer = (state: IFGame, action: GameAction) => {
@@ -20,13 +20,13 @@ const gameSelectReducer = (state: IFGame, action: GameAction) => {
 };
 
 // Card view for the game
-export const CardView = (props: IFGame) => {
-  const gameid = useState(props.gameid);
+export const CardView = (props: IFGameProps) => {
+  const gameid = useState(props);
   return (
     <div
       onClick={() => {
         if (props.callBack) {
-          props.callBack(props.gameid);
+          props.callBack(props.gameData);
         }
       }}
       className={GameStyle.cardview}
@@ -51,9 +51,9 @@ export const GameView = () => {
         data.map((item) => {
           return (
             <CardView
-              gameid={item.gameid}
-              callBack={(id) => {
-                console.log("game id", id);
+              gameData={item}
+              callBack={(gameData: IFGame) => {
+                console.log(gameData);
               }}
               key={item.gameid}
             >
@@ -62,7 +62,24 @@ export const GameView = () => {
                   <b>Game name: {item.gamename}</b>
                 </h4>
                 <p>Game Details: {item.gamedesc}</p>
-                <b>Multiplayer: {item.multiplayer ? "Yes" : "No"}</b>
+                <b>
+                  {item.multiplayer ? (
+                    <div>
+                      Multiplayer:
+                      <div>
+                        <button onClick={() => {}}>Single Player</button>
+                      </div>
+                      <div>
+                        <button onClick={() => {}}>MultiPlayer</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      Single Player:
+                      <button onClick={() => {}}>Single Player</button>
+                    </div>
+                  )}
+                </b>
               </div>
             </CardView>
           );

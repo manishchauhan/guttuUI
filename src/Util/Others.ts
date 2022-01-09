@@ -132,8 +132,15 @@ export interface IFGame {
     multiplayer?: boolean;
     played?: number;
     gameimg?: string;
-    children?: ReactChild | ReactChildren;
-    callBack?:CallbackFunctionVariadic
+
+  
+  }
+
+  export interface IFGameProps
+  {
+      gameData?:IFGame
+      children?: ReactChild | ReactChildren;
+      callBack?:CallbackFunctionVariadic
   }
 
 export interface GameAction

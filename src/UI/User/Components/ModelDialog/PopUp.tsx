@@ -15,6 +15,8 @@ export interface IFPopUpModelData {
   backgroundStyle?: string | undefined;
   contentStyle?: string | undefined;
   closeStyle?: string | undefined;
+  width?: number;
+  height?: number;
 }
 export const ModelPopUp = (props: IFPopUpModelData) => {
   return (
@@ -28,6 +30,7 @@ export const ModelPopUp = (props: IFPopUpModelData) => {
           className={
             !props.contentStyle ? PopUpStyle.content : props.contentStyle
           }
+          style={{ width: props.width, height: props.height }}
         >
           <span
             className={!props.closeStyle ? PopUpStyle.close : props.closeStyle}

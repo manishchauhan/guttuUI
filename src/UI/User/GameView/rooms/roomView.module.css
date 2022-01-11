@@ -1,0 +1,11 @@
+.contentClass {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+.buttonStyle {
+  width: 100px;
+  height: 35px;
+}

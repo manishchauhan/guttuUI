@@ -3,6 +3,7 @@ import { useFetch } from "../../../Util/CustomHokks";
 import { GameAction, IFGame, IFGameProps } from "../../../Util/Others";
 import { IFGameAreaProps } from "../GameView/GameArea";
 import GameStyle from "./GameStyle.module.css";
+import { RoomList } from "./rooms/roomList";
 
 /* Reducer */
 const gameSelectReducer = (state: IFGame, action: GameAction) => {
@@ -44,9 +45,16 @@ export const GameView = () => {
   const [data, loading] = useFetch<IFGame>(
     `http://localhost:4040/user/fungames`
   );
+  const [isGameSelected, setiisGameSelected] = useState(false);
+  const [selectGameState, dispatchSelectGame] = useReducer(gameSelectReducer, {
+    gameid: 0,
+    gamename: ``,
+    multiplayer: false,
+  });
+  const [showRoomList, setShowRoomList] = useState(false);
   // select a single player game
 
-  function selectSinglePlayerGame() {
+  function selectSinglePlayerGame(gameData: IFGame) {
     if (!isGameSelected) {
       setiisGameSelected(true);
       GameAreaView = lazy(() =>
@@ -59,24 +67,13 @@ export const GameView = () => {
 
   // select a multiplayer game
 
-  function selectMultiPlayerGame() {
-    if (!isGameSelected) {
-      setiisGameSelected(true);
-      GameAreaView = lazy(() =>
-        import("../GameView/GameArea").then((module) => ({
-          default: module.GameArea,
-        }))
-      );
-    }
+  function selectMultiPlayerGame(gameData: IFGame) {
+    setShowRoomList(true);
   }
-  const [isGameSelected, setiisGameSelected] = useState(false);
-  const [selectGameState, dispatchSelectGame] = useReducer(gameSelectReducer, {
-    gameid: 0,
-    gamename: ``,
-    multiplayer: false,
-  });
+
   return (
     <div>
+      <RoomList show={showRoomList}></RoomList>
       {isGameSelected ? (
         <Suspense fallback={<div>Loading view</div>}>
           <GameAreaView
@@ -98,7 +95,7 @@ export const GameView = () => {
                 <CardView
                   gameData={item}
                   callBack={(gameData: IFGame) => {
-                    console.log(gameData);
+                    // console.log(gameData);
                   }}
                   key={item.gameid}
                 >
@@ -114,7 +111,7 @@ export const GameView = () => {
                           <div>
                             <button
                               onClick={() => {
-                                selectSinglePlayerGame();
+                                selectSinglePlayerGame(item);
                               }}
                             >
                               Single Player
@@ -123,7 +120,7 @@ export const GameView = () => {
                           <div>
                             <button
                               onClick={() => {
-                                selectMultiPlayerGame();
+                                selectMultiPlayerGame(item);
                               }}
                             >
                               MultiPlayer
@@ -135,7 +132,7 @@ export const GameView = () => {
                           Single Player:
                           <button
                             onClick={() => {
-                              selectSinglePlayerGame();
+                              selectSinglePlayerGame(item);
                             }}
                           >
                             Single Player

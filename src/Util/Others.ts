@@ -1,7 +1,7 @@
 
 import { ReactChild, ReactChildren } from "react";
 import { Interface } from "readline";
-import { IFAuthData } from "../UI/User/UserView";
+import { IFAuthData, IFUser } from "../UI/User/UserView";
 
 export type CallbackFunctionVariadic = (...args: any[]) => void;
 
@@ -123,7 +123,7 @@ More More
 More More
 */
 // Game interface holding all game information
-export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL";
+export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL"|"MULTIPLAYER";
 export interface IFGame {
     gameid?: number | undefined;
     gamename?: string | undefined;
@@ -132,7 +132,7 @@ export interface IFGame {
     multiplayer?: boolean;
     played?: number;
     gameimg?: string;
-
+   
   
   }
 
@@ -143,8 +143,14 @@ export interface IFGame {
       callBack?:CallbackFunctionVariadic
   }
 
+  export interface IFgameAndUser
+  {
+      game?:IFGame,
+      user?:IFUser
+  }
 export interface GameAction
 {
     type:GameActionType
+    payload?:IFgameAndUser
 }
 

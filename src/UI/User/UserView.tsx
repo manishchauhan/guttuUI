@@ -22,6 +22,7 @@ export interface IFAuthData {
   email?: string;
   isLogin?: boolean;
   user?: string;
+  userid?: string | number;
 }
 
 export interface IFAuthTokenAndData {

@@ -1,20 +1,15 @@
 import { lazy, Suspense, useEffect, useReducer, useState } from "react";
 import { useFetch } from "../../../Util/CustomHokks";
-import { GameAction, IFGame, IFGameProps } from "../../../Util/Others";
+import {
+  GameAction,
+  IFGame,
+  IFGameProps,
+  LocalDataStorage,
+} from "../../../Util/Others";
 import { IFGameAreaProps } from "../GameView/GameArea";
+import { IFAuthData, IFUser } from "../UserView";
 import GameStyle from "./GameStyle.module.css";
-import { RoomList } from "./rooms/roomList";
-
-/* Reducer */
-const gameSelectReducer = (state: IFGame, action: GameAction) => {
-  switch (action.type) {
-    case "SELECT":
-      console.log("game is selected", state);
-      return { ...state };
-    default:
-      return state;
-  }
-};
+import { IFroomListData, RoomList } from "./rooms/roomList";
 
 /*
   Game card view
@@ -35,7 +30,23 @@ export const CardView = (props: IFGameProps) => {
   );
 };
 
-/*
+/* Reducer */
+const gameSelectReducer = (state: IFroomListData, action: GameAction) => {
+  switch (action.type) {
+    case "SELECT":
+      return { ...state };
+    case "MULTIPLAYER":
+      const newState: IFroomListData = {
+        show: true,
+        gameData: action.payload?.game,
+        user: action.payload?.user,
+      };
+
+      return newState;
+    default:
+      return state;
+  }
+};
 
 /*
   GameView 
@@ -47,15 +58,11 @@ export const GameView = () => {
   );
   const [isGameSelected, setiisGameSelected] = useState(false);
   const [selectGameState, dispatchSelectGame] = useReducer(gameSelectReducer, {
-    gameid: 0,
-    gamename: ``,
-    multiplayer: false,
+    show: false,
   });
-  const [showRoomList, setShowRoomList] = useState(false);
+  const [romListData, setromListData] = useState<IFroomListData>();
   // select a single player game
-  useEffect(() => {
-    setShowRoomList(showRoomList);
-  }, [showRoomList]);
+
   function selectSinglePlayerGame(gameData: IFGame) {
     if (!isGameSelected) {
       setiisGameSelected(true);
@@ -70,18 +77,26 @@ export const GameView = () => {
   // select a multiplayer game
 
   function selectMultiPlayerGame(gameData: IFGame) {
-    setShowRoomList(!showRoomList);
+    const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
+      "userData"
+    ) as IFAuthData;
+    const user: IFUser = {
+      UserName: authData.user,
+      Email: authData.email,
+      UserId: authData.userid as number,
+    };
+    dispatchSelectGame({
+      type: "MULTIPLAYER",
+      payload: { game: gameData, user: user },
+    });
   }
 
   return (
     <div>
       <RoomList
-        show={showRoomList}
-        onClose={(status) => {
-          if (status) {
-            setShowRoomList(false);
-          }
-        }}
+        show={selectGameState.show}
+        user={selectGameState.user}
+        gameData={selectGameState.gameData}
       ></RoomList>
       {isGameSelected ? (
         <Suspense fallback={<div>Loading view</div>}>

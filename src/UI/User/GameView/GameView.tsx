@@ -1,4 +1,4 @@
-import { lazy, Suspense, useReducer, useState } from "react";
+import { lazy, Suspense, useEffect, useReducer, useState } from "react";
 import { useFetch } from "../../../Util/CustomHokks";
 import { GameAction, IFGame, IFGameProps } from "../../../Util/Others";
 import { IFGameAreaProps } from "../GameView/GameArea";
@@ -53,7 +53,9 @@ export const GameView = () => {
   });
   const [showRoomList, setShowRoomList] = useState(false);
   // select a single player game
-
+  useEffect(() => {
+    setShowRoomList(showRoomList);
+  }, [showRoomList]);
   function selectSinglePlayerGame(gameData: IFGame) {
     if (!isGameSelected) {
       setiisGameSelected(true);
@@ -68,12 +70,19 @@ export const GameView = () => {
   // select a multiplayer game
 
   function selectMultiPlayerGame(gameData: IFGame) {
-    setShowRoomList(true);
+    setShowRoomList(!showRoomList);
   }
 
   return (
     <div>
-      <RoomList show={showRoomList}></RoomList>
+      <RoomList
+        show={showRoomList}
+        onClose={(status) => {
+          if (status) {
+            setShowRoomList(false);
+          }
+        }}
+      ></RoomList>
       {isGameSelected ? (
         <Suspense fallback={<div>Loading view</div>}>
           <GameAreaView
@@ -119,7 +128,7 @@ export const GameView = () => {
                           </div>
                           <div>
                             <button
-                              onClick={() => {
+                              onClick={async () => {
                                 selectMultiPlayerGame(item);
                               }}
                             >

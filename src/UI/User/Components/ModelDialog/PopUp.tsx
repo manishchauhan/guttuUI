@@ -34,6 +34,11 @@ export const ModelPopUp = (props: IFPopUpModelData) => {
         >
           <span
             className={!props.closeStyle ? PopUpStyle.close : props.closeStyle}
+            onClick={() => {
+              if (props.callBack) {
+                props.callBack();
+              }
+            }}
           >
             &times;
           </span>

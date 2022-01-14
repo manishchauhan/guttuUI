@@ -12,3 +12,11 @@
   display: flex;
   justify-content: center;
 }
+.roomSuccessStyle {
+  display: flex;
+  background: green;
+  justify-content: center;
+  height: 25px;
+  color: white;
+  font-family: cursive;
+}

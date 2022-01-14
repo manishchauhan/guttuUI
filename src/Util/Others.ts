@@ -135,7 +135,7 @@ export interface IFGame {
    
   
   }
-
+  
   export interface IFGameProps
   {
       gameData?:IFGame
@@ -155,6 +155,28 @@ export interface GameAction
     payload?:IFgameAndUser
     // pop up status
    
+}
+/*
+roomid	
+userid	
+gameid	
+parentgame	
+roomname	
+roomdesc	
+roomimg	
+players*/	
+export interface IFroomData
+{
+    roomid?:string	
+    userid?:string	
+    gameid?:string	
+    parentgame?:string	
+    roomname?:string	
+    roomdesc?:string	
+    roomimg?:string	
+    players?:number //no of players allowed
+    creator?:string //user who created this room
+    
 }
 
 export interface playerAllowed {

@@ -35,6 +35,7 @@ const roomListReducer = (state: IFroomListData, action: GameAction) => {
 
 export const RoomList = (props: IFroomListData) => {
   const [show, setShow] = useState(props.show);
+  const [roomMsg, setRoomMsg] = useState<string | undefined>();
   const [roomListState, dispatchRoomList] = useReducer(roomListReducer, {
     show: false,
   });
@@ -80,6 +81,9 @@ export const RoomList = (props: IFroomListData) => {
             }}
           >
             <div>
+              {roomMsg && (
+                <div className={roomListStyle.roomSuccessStyle}>{roomMsg}</div>
+              )}
               <h3 className={roomListStyle.heading}>GAME ROOM LIST</h3>
               <div className={roomListStyle.topMenu}>
                 <button
@@ -100,7 +104,16 @@ export const RoomList = (props: IFroomListData) => {
                 <input type="checkbox" />
               </div>
               <div className={roomListStyle.roomViewStyle}>
-                {roomListState.show && <RoomView></RoomView>}
+                {roomListState.show && (
+                  <RoomView
+                    callBack={(msg) => {
+                      setRoomMsg(msg);
+                      setTimeout(() => {
+                        setRoomMsg(undefined);
+                      }, 2500);
+                    }}
+                  ></RoomView>
+                )}
               </div>
             </div>
           </ModelPopUp>

@@ -1,11 +1,17 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { sendData } from "../../../../Util/dataService";
-import { LocalDataStorage, playerAllowedArray } from "../../../../Util/Others";
+import {
+  CallbackFunctionVariadic,
+  LocalDataStorage,
+  playerAllowedArray,
+} from "../../../../Util/Others";
 import { ModelPopUp } from "../../Components/ModelDialog/PopUp";
 import { IFroomListData, RoomListContext } from "./roomList";
 import roomViewStyle from "./roomView.module.css";
-
-export const RoomView = () => {
+interface IFroomView {
+  callBack?: CallbackFunctionVariadic;
+}
+export const RoomView = (props: IFroomView) => {
   const roomData = useContext<IFroomListData>(RoomListContext);
   const [roomName, setRoomName] = useState("");
   const [roomDetails, setRoomDetails] = useState("");
@@ -36,7 +42,9 @@ export const RoomView = () => {
       credentials: "include",
       body: JSON.stringify(newRoomData),
     });
-    console.log(result.message);
+    if (props.callBack) {
+      props.callBack(result.message);
+    }
   }
 
   return (

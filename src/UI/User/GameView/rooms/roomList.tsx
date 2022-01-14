@@ -1,26 +1,56 @@
 import roomListStyle from "./roomList.module.css";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import { ModelPopUp } from "../../Components/ModelDialog/PopUp";
 import { RoomView } from "./roomView";
-import { CallbackFunctionVariadic, IFGame } from "../../../../Util/Others";
+import {
+  CallbackFunctionVariadic,
+  GameAction,
+  IFGame,
+} from "../../../../Util/Others";
 import { IFUser } from "../../UserView";
+
 export interface IFroomListData {
   show?: boolean;
   onClose?: CallbackFunctionVariadic;
   gameData?: IFGame;
   user?: IFUser;
 }
+/* createContext */
+export const RoomListContext = createContext<IFroomListData>({});
+/* Reducer */
+const roomListReducer = (state: IFroomListData, action: GameAction) => {
+  switch (action.type) {
+    case "SELECT":
+      const newState = {
+        show: action.payload?.show,
+        gameData: action.payload?.game,
+        user: action.payload?.user,
+      };
+      console.log(newState);
+      return newState;
+    default:
+      return state;
+  }
+};
 
 export const RoomList = (props: IFroomListData) => {
   const [show, setShow] = useState(props.show);
-  const [gameData, setGameData] = useState<IFGame | undefined>(props.gameData);
-  const [user, setUser] = useState<IFUser | undefined>(props.user);
+  const [roomListState, dispatchRoomList] = useReducer(roomListReducer, {
+    show: false,
+  });
+
   /*
     add a new room for login user
   */
   function addRoom() {
-    console.log(user);
-    console.log(gameData);
+    dispatchRoomList({
+      type: "SELECT",
+      payload: {
+        show: true,
+        user: props.user,
+        game: props.gameData,
+      },
+    });
   }
 
   /*
@@ -33,47 +63,49 @@ export const RoomList = (props: IFroomListData) => {
   function deleteRoom() {}
 
   useEffect(() => {
-    console.log("render");
     setShow(props.show);
-    setGameData(props.gameData);
-    setUser(props.user);
-  }, [props.show, props.gameData, props.user]);
+  }, [props.show]);
   return (
-    <div>
-      {show && (
-        <ModelPopUp
-          width={400}
-          height={550}
-          callBack={() => {
-            setShow(!show);
-            if (props.onClose) {
-              props.onClose(show);
-            }
-          }}
-        >
-          <div>
-            <h3 className={roomListStyle.heading}>GAME ROOM LIST</h3>
-            <div className={roomListStyle.topMenu}>
-              <button
-                onClick={() => {
-                  addRoom();
-                }}
-              >
-                Add Room
-              </button>
-              <button
-                onClick={() => {
-                  deleteRoom();
-                }}
-              >
-                Remove Room
-              </button>
-              Select All Rooms
-              <input type="checkbox" />
+    <RoomListContext.Provider value={roomListState}>
+      <div>
+        {show && (
+          <ModelPopUp
+            width={600}
+            height={550}
+            callBack={() => {
+              setShow(!show);
+              if (props.onClose) {
+                props.onClose(show);
+              }
+            }}
+          >
+            <div>
+              <h3 className={roomListStyle.heading}>GAME ROOM LIST</h3>
+              <div className={roomListStyle.topMenu}>
+                <button
+                  onClick={() => {
+                    addRoom();
+                  }}
+                >
+                  Add Room
+                </button>
+                <button
+                  onClick={() => {
+                    deleteRoom();
+                  }}
+                >
+                  Remove Room
+                </button>
+                Select All Rooms
+                <input type="checkbox" />
+              </div>
+              <div className={roomListStyle.roomViewStyle}>
+                {roomListState.show && <RoomView></RoomView>}
+              </div>
             </div>
-          </div>
-        </ModelPopUp>
-      )}
-    </div>
+          </ModelPopUp>
+        )}
+      </div>
+    </RoomListContext.Provider>
   );
 };

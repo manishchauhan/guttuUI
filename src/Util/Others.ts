@@ -147,10 +147,18 @@ export interface IFGame {
   {
       game?:IFGame,
       user?:IFUser
+      show?:boolean
   }
 export interface GameAction
 {
     type:GameActionType
     payload?:IFgameAndUser
+    // pop up status
+   
 }
 
+export interface playerAllowed {
+    value?: number;
+    index?: number;
+  }
+  export const playerAllowedArray: Array<playerAllowed> = [{value:2,index:1},{value:4,index:2},{value:6,index:3},{value:8,index:4},{value:10,index:5}];

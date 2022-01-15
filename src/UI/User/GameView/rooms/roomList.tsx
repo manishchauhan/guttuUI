@@ -47,7 +47,7 @@ export const RoomList = (props: IFroomListData) => {
   const [roomListState, dispatchRoomList] = useReducer(roomListReducer, {
     show: false,
   });
-  const [roomListData, roomListLoading] = useFetch<IFroomData>(
+  const [roomListData, roomListLoading, setRoomListData] = useFetch<IFroomData>(
     `http://localhost:4040/room/roomlist`
   );
 
@@ -171,6 +171,7 @@ export const RoomList = (props: IFroomListData) => {
                       setTimeout(() => {
                         setRoomMsg(undefined);
                         closeRoomAddWindow();
+                        setRoomListData(`http://localhost:4040/room/roomlist`);
                       }, 2500);
                     }}
                     closeCallBack={() => {

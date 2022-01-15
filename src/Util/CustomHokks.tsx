@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { fetchDataAuth } from "./dataService";
 
-export const useFetch = <T extends Partial<T>>(url: string) => {
+export const useFetch = <T extends any>(url: string) => {
   const [data, setData] = useState<Array<T>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const fetechData = async () => {

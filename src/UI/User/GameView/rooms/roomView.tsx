@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { sendData } from "../../../../Util/dataService";
 import {
   CallbackFunctionVariadic,
+  IFroomData,
   LocalDataStorage,
   playerAllowedArray,
 } from "../../../../Util/Others";
@@ -10,6 +11,7 @@ import { IFroomListData, RoomListContext } from "./roomList";
 import roomViewStyle from "./roomView.module.css";
 interface IFroomView {
   callBack?: CallbackFunctionVariadic;
+  closeCallBack?: CallbackFunctionVariadic;
 }
 export const RoomView = (props: IFroomView) => {
   const roomData = useContext<IFroomListData>(RoomListContext);
@@ -32,6 +34,7 @@ export const RoomView = (props: IFroomView) => {
       roomdesc: roomDetails,
       players: noOfplayers,
       parentgame: roomData.gameData?.gamename,
+      creator: roomData.user?.UserName,
       ACCESS_TOKEN: LocalDataStorage.getTokenFromCookie(`accessToken`),
     };
     const result = await sendData(`http://localhost:4040/room/add`, {
@@ -48,7 +51,16 @@ export const RoomView = (props: IFroomView) => {
   }
 
   return (
-    <ModelPopUp width={400} backgroundStyle="modal" contentStyle="content">
+    <ModelPopUp
+      width={400}
+      backgroundStyle="modal"
+      contentStyle="content"
+      callBack={() => {
+        if (props.closeCallBack) {
+          props.closeCallBack();
+        }
+      }}
+    >
       <div className={roomViewStyle.contentClass}>
         <h1>Create a Room </h1>
         <b>Room name: </b>

@@ -14,13 +14,13 @@ import { IFroomListData, RoomList } from "./rooms/roomList";
 /*
   Game card view
 */
-export const CardView = (props: IFGameProps) => {
+export const CardView = <T extends any>(props: IFGameProps<T>) => {
   const gameid = useState(props);
   return (
     <div
       onClick={() => {
         if (props.callBack) {
-          props.callBack(props.gameData);
+          props.callBack(props.data);
         }
       }}
       className={GameStyle.cardview}
@@ -43,6 +43,12 @@ const gameSelectReducer = (state: IFroomListData, action: GameAction) => {
       };
 
       return newState;
+    case "CLOSE":
+      return {
+        show: false,
+        gameData: state.gameData,
+        user: state.user,
+      };
     default:
       return state;
   }
@@ -97,6 +103,12 @@ export const GameView = () => {
         show={selectGameState.show}
         user={selectGameState.user}
         gameData={selectGameState.gameData}
+        onClose={() => {
+          dispatchSelectGame({
+            type: "CLOSE",
+            payload: { show: false },
+          });
+        }}
       ></RoomList>
       {isGameSelected ? (
         <Suspense fallback={<div>Loading view</div>}>
@@ -117,8 +129,8 @@ export const GameView = () => {
             data.map((item) => {
               return (
                 <CardView
-                  gameData={item}
-                  callBack={(gameData: IFGame) => {
+                  data={item}
+                  callBack={(data: IFGame) => {
                     // console.log(gameData);
                   }}
                   key={item.gameid}

@@ -11,6 +11,9 @@
 .roomViewStyle {
   display: flex;
   justify-content: center;
+  position: fixed;
+  margin-left: 100px;
+  background: lightblue;
 }
 .roomSuccessStyle {
   display: flex;
@@ -19,4 +22,29 @@
   height: 25px;
   color: white;
   font-family: cursive;
+}
+
+.cardContainer {
+  display: flex;
+  /* justify-content: center; */
+  flex-direction: column;
+  align-items: center;
+  margin-top: 25px;
+  scroll-behavior: auto;
+  overflow: auto;
+  height: 400px;
+  gap: 25px;
+}
+.cardData {
+  display: flex;
+  margin: 20px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+.cardActionStyle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  height: 25px;
 }

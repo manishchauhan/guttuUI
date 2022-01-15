@@ -123,7 +123,7 @@ More More
 More More
 */
 // Game interface holding all game information
-export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL"|"MULTIPLAYER";
+export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL"|"MULTIPLAYER"|"CLOSE";
 export interface IFGame {
     gameid?: number | undefined;
     gamename?: string | undefined;
@@ -136,9 +136,9 @@ export interface IFGame {
   
   }
   
-  export interface IFGameProps
+  export interface IFGameProps<T>
   {
-      gameData?:IFGame
+      data?:T
       children?: ReactChild | ReactChildren;
       callBack?:CallbackFunctionVariadic
   }

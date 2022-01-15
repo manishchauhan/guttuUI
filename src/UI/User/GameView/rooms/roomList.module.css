@@ -48,3 +48,14 @@
   gap: 10px;
   height: 25px;
 }
+.searchBarStyle {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  gap: 20px;
+}
+.noPlayerStyle {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}

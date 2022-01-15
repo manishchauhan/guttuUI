@@ -7,8 +7,10 @@ import {
   GameAction,
   IFGame,
   IFroomData,
+  LocalDataStorage,
+  UserAction,
 } from "../../../../Util/Others";
-import { IFUser } from "../../UserView";
+import { IFAuthData, IFUser } from "../../UserView";
 import { useFetch } from "../../../../Util/CustomHokks";
 import { CardView } from "../GameView";
 
@@ -17,6 +19,7 @@ export interface IFroomListData {
   onClose?: CallbackFunctionVariadic;
   gameData?: IFGame;
   user?: IFUser;
+  roomData?: IFroomData;
 }
 /* createContext */
 export const RoomListContext = createContext<IFroomListData>({});
@@ -29,7 +32,12 @@ const roomListReducer = (state: IFroomListData, action: GameAction) => {
         gameData: action.payload?.game,
         user: action.payload?.user,
       };
-
+    case "EDIT":
+      return {
+        ...state,
+        roomData: action.payload?.roomData,
+        show: action.payload?.show,
+      };
     case "CLOSE":
       return {
         show: action.payload?.show,
@@ -42,19 +50,22 @@ const roomListReducer = (state: IFroomListData, action: GameAction) => {
 };
 
 export const RoomList = (props: IFroomListData) => {
+  let msgTimeOut: any = undefined;
   const [show, setShow] = useState(props.show);
   const [roomMsg, setRoomMsg] = useState<string | undefined>();
+  const [roomMode, setRoomMode] = useState<UserAction>("ADD");
   const [roomListState, dispatchRoomList] = useReducer(roomListReducer, {
     show: false,
   });
   const [roomListData, roomListLoading, setRoomListData] = useFetch<IFroomData>(
     `http://localhost:4040/room/roomlist`
   );
-
+  const [newRoomHeading, setNewRoomHeading] = useState(`add new room`);
   /*
     add a new room for login user
   */
   function addRoom() {
+    setRoomMode("ADD");
     dispatchRoomList({
       type: "SELECT",
       payload: {
@@ -64,19 +75,44 @@ export const RoomList = (props: IFroomListData) => {
       },
     });
   }
+  function editNewRoom(roomData: IFroomData) {
+    const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
+      "userData"
+    ) as IFAuthData;
+    if (authData.userid !== roomData.userid) {
+      setRoomMsg(`You are not allowed to edit other people rooms`);
+      if (msgTimeOut) {
+        clearInterval(msgTimeOut);
+      }
+      msgTimeOut = setTimeout(() => {
+        setRoomMsg(``);
+      }, 2500);
+      return;
+    }
+    setRoomMode("UPDATE");
+    setNewRoomHeading("Edit this Room");
+    dispatchRoomList({
+      type: "EDIT",
+      payload: { roomData: roomData, show: true },
+    });
+  }
+
+  //  ALL ROOM LIST----------------------------------------------------------
   function displayAllRooms() {
     return (
       <>
-        <div>
-          {roomListData.length > 1 ? "Number of rooms" : "Number of room"}{" "}
-          <b>{roomListData.length}</b>{" "}
-        </div>
         {roomListData.map((item) => {
           return (
             <CardView key={item.roomid}>
               <div className={roomListStyle.cardData}>
                 <div className={roomListStyle.cardActionStyle}>
-                  <button>Edit</button>
+                  <button
+                    onClick={() => {
+                      editNewRoom(item);
+                    }}
+                  >
+                    Edit
+                  </button>
                   <button>Delete</button>
                   Select Room : <input type="checkbox"></input>
                 </div>
@@ -132,7 +168,7 @@ export const RoomList = (props: IFroomListData) => {
         {show && (
           <ModelPopUp
             width={600}
-            height={550}
+            height={600}
             callBack={() => {
               setShow(!show);
               if (props.onClose) {
@@ -145,6 +181,10 @@ export const RoomList = (props: IFroomListData) => {
                 <div className={roomListStyle.roomSuccessStyle}>{roomMsg}</div>
               )}
               <h3 className={roomListStyle.heading}>GAME ROOM LIST</h3>
+              <div className={roomListStyle.noPlayerStyle}>
+                {roomListData.length > 1 ? "Number of rooms" : "Number of room"}{" "}
+                <b>{roomListData.length}</b>{" "}
+              </div>
               <div className={roomListStyle.topMenu}>
                 <button
                   onClick={() => {
@@ -163,9 +203,15 @@ export const RoomList = (props: IFroomListData) => {
                 Select All Rooms
                 <input type="checkbox" />
               </div>
+              <div className={roomListStyle.searchBarStyle}>
+                <b>SEARCH SOMETHING</b>
+                <input type="text"></input>
+              </div>
               <div className={roomListStyle.roomViewStyle}>
                 {roomListState.show && (
                   <RoomView
+                    mode={roomMode}
+                    heading={newRoomHeading}
                     callBack={(msg) => {
                       setRoomMsg(msg);
                       setTimeout(() => {
@@ -173,9 +219,11 @@ export const RoomList = (props: IFroomListData) => {
                         closeRoomAddWindow();
                         setRoomListData(`http://localhost:4040/room/roomlist`);
                       }, 2500);
+                      setNewRoomHeading("add new room");
                     }}
                     closeCallBack={() => {
                       closeRoomAddWindow();
+                      setNewRoomHeading("add new room");
                     }}
                   ></RoomView>
                 )}

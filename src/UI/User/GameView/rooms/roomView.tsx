@@ -106,7 +106,12 @@ export const RoomView = (props: IFroomView) => {
     } as const;
     pushDataToServer<IFroomMergeData>(
       newRoomData,
-      `http://localhost:4040/room/add`
+      `http://localhost:4040/room/add`,
+      (msg: string) => {
+        if (props.callBack) {
+          props.callBack(msg);
+        }
+      }
     );
   }
 

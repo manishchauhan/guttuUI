@@ -13,5 +13,6 @@ export const useFetch = <T extends any>(url: string) => {
     fetechData(url);
     setLoading(false);
   }, []);
-  return [data, loading, fetechData] as const;
+  //if data is thier set it setData
+  return [data, loading, fetechData, setData] as const;
 };

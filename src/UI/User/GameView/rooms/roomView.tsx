@@ -5,6 +5,7 @@ import {
   IFroomData,
   LocalDataStorage,
   playerAllowedArray,
+  pushDataToServer,
   UserAction,
 } from "../../../../Util/Others";
 import { ModelPopUp } from "../../Components/ModelDialog/PopUp";
@@ -72,23 +73,13 @@ export const RoomView = (props: IFroomView) => {
 
     pushDataToServer<IFroomMergeData>(
       newRoomData,
-      `http://localhost:4040/room/update`
+      `http://localhost:4040/room/update`,
+      (msg: string) => {
+        if (props.callBack) {
+          props.callBack(msg);
+        }
+      }
     );
-  }
-
-  // PUSH DATA BACK TO THE SERVER
-  async function pushDataToServer<T>(newRoomData: T, url: string) {
-    const result = await sendData(url, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(newRoomData),
-    });
-    if (props.callBack) {
-      props.callBack(result.message);
-    }
   }
 
   // CREATE ROOM

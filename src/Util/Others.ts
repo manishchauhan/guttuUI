@@ -2,6 +2,7 @@
 import { ReactChild, ReactChildren } from "react";
 import { Interface } from "readline";
 import { IFAuthData, IFUser } from "../UI/User/UserView";
+import { sendData } from "./dataService";
 
 export type CallbackFunctionVariadic = (...args: any[]) => void;
 
@@ -123,7 +124,7 @@ More More
 More More
 */
 // Game interface holding all game information
-export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL"|"MULTIPLAYER"|"CLOSE"|"EDIT";
+export type GameActionType="SELECT"|"ROLLOVER"|"DETAIL"|"MULTIPLAYER"|"CLOSE"|"EDIT"|"DELETE";
 export interface IFGame {
     gameid?: number | undefined;
     gamename?: string | undefined;
@@ -188,3 +189,19 @@ export interface playerAllowed {
 
 
   export type UserAction=`ADD`|`UPDATE`|`DELETE`
+
+
+   // PUSH DATA BACK TO THE SERVER
+   export async function pushDataToServer<T>(newRoomData: T, url: string,callBack?:CallbackFunctionVariadic) {
+    const result = await sendData(url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(newRoomData),
+    });
+    if (callBack) {
+      callBack(result.message);
+    }
+  }

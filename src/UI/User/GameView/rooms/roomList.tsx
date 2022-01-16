@@ -8,11 +8,14 @@ import {
   IFGame,
   IFroomData,
   LocalDataStorage,
+  pushDataToServer,
   UserAction,
 } from "../../../../Util/Others";
 import { IFAuthData, IFUser } from "../../UserView";
 import { useFetch } from "../../../../Util/CustomHokks";
 import { CardView } from "../GameView";
+import { FixedPopUp } from "../../Components/PopUps/FixedPopUp";
+import { sendData } from "../../../../Util/dataService";
 
 export interface IFroomListData {
   show?: boolean;
@@ -44,6 +47,7 @@ const roomListReducer = (state: IFroomListData, action: GameAction) => {
         gameData: state.gameData,
         user: state.user,
       };
+
     default:
       return state;
   }
@@ -57,10 +61,12 @@ export const RoomList = (props: IFroomListData) => {
   const [roomListState, dispatchRoomList] = useReducer(roomListReducer, {
     show: false,
   });
-  const [roomListData, roomListLoading, setRoomListData] = useFetch<IFroomData>(
-    `http://localhost:4040/room/roomlist`
-  );
+  const [roomListData, roomListLoading, setRoomListData, setRoomListDataCache] =
+    useFetch<IFroomData>(`http://localhost:4040/room/roomlist`);
   const [newRoomHeading, setNewRoomHeading] = useState(`add new room`);
+  const [selectedRoomData, setSelectedRoomData] = useState<IFroomData | null>(
+    null
+  );
   /*
     add a new room for login user
   */
@@ -96,7 +102,26 @@ export const RoomList = (props: IFroomListData) => {
       payload: { roomData: roomData, show: true },
     });
   }
-
+  /*
+    delete a room
+  */
+  function confirmDeleteRoom(roomData: IFroomData) {
+    // Auth token
+    const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
+      "userData"
+    ) as IFAuthData;
+    if (authData.userid !== roomData.userid) {
+      setRoomMsg(`You are not allowed to delete other people rooms`);
+      if (msgTimeOut) {
+        clearInterval(msgTimeOut);
+      }
+      msgTimeOut = setTimeout(() => {
+        setRoomMsg(``);
+      }, 2500);
+      return;
+    }
+    setSelectedRoomData(roomData);
+  }
   //  ALL ROOM LIST----------------------------------------------------------
   function displayAllRooms() {
     return (
@@ -113,7 +138,13 @@ export const RoomList = (props: IFroomListData) => {
                   >
                     Edit
                   </button>
-                  <button>Delete</button>
+                  <button
+                    onClick={() => {
+                      confirmDeleteRoom(item);
+                    }}
+                  >
+                    Delete
+                  </button>
                   Select Room : <input type="checkbox"></input>
                 </div>
                 <div>
@@ -139,6 +170,30 @@ export const RoomList = (props: IFroomListData) => {
       </>
     );
   }
+  function deleteRoom() {
+    const roomToDelete = {
+      roomid: selectedRoomData?.roomid as string,
+      ACCESS_TOKEN: LocalDataStorage.getTokenFromCookie(`accessToken`),
+    };
+    pushDataToServer(
+      roomToDelete,
+      `http://localhost:4040/room/delete`,
+      (msg) => {
+        const roomListUpdatedData = roomListData.filter((data) => {
+          return data.roomid !== selectedRoomData?.roomid;
+        });
+        setRoomListDataCache(roomListUpdatedData);
+        setRoomMsg(`Room deleted from the server`);
+        setSelectedRoomData(null);
+        if (msgTimeOut) {
+          clearInterval(msgTimeOut);
+        }
+        msgTimeOut = setTimeout(() => {
+          setRoomMsg(``);
+        }, 2500);
+      }
+    );
+  }
   /*
     close room add window
   */
@@ -154,10 +209,6 @@ export const RoomList = (props: IFroomListData) => {
     select only those room which is created by user so he/she can delete the selected room
   */
   function selectRooms() {}
-  /*
-    delete a room
-  */
-  function deleteRoom() {}
 
   useEffect(() => {
     setShow(props.show);
@@ -195,7 +246,7 @@ export const RoomList = (props: IFroomListData) => {
                 </button>
                 <button
                   onClick={() => {
-                    deleteRoom();
+                    //deleteRoom();
                   }}
                 >
                   Remove Room
@@ -229,6 +280,36 @@ export const RoomList = (props: IFroomListData) => {
                 )}
               </div>
               <div className={roomListStyle.cardContainer}>
+                <div
+                  className={
+                    selectedRoomData !== null
+                      ? roomListStyle.fixedPopUpStyleShow
+                      : roomListStyle.fixedPopUpStyleHide
+                  }
+                >
+                  <FixedPopUp
+                    heading={`Are you sur you want to delete ${
+                      selectedRoomData?.roomname as string
+                    } Room`}
+                    yes="YES"
+                    no="NO"
+                    callBack={(status) => {
+                      if (status) {
+                        deleteRoom();
+                      } else {
+                        setSelectedRoomData(null);
+                      }
+                    }}
+                  >
+                    <div>
+                      <h3>
+                        Please Remember if you delete this room it would be
+                        never back you need to recreate it and you would loose
+                        all data realted to room
+                      </h3>
+                    </div>
+                  </FixedPopUp>
+                </div>
                 {!roomListLoading ? displayAllRooms() : <div>Loading.....</div>}
               </div>
             </div>

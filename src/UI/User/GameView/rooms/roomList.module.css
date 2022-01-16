@@ -59,3 +59,13 @@
   justify-content: center;
   margin: 20px;
 }
+.fixedPopUpStyleHide {
+  display: flex;
+  justify-content: center;
+  visibility: hidden;
+}
+.fixedPopUpStyleShow {
+  display: flex;
+  justify-content: center;
+  visibility: visible;
+}

@@ -178,6 +178,7 @@ export interface IFroomData
     roomimg?:string	
     players?:number //no of players allowed
     creator?:string //user who created this room
+    selected?:boolean
     
 }
 

@@ -62,7 +62,9 @@ export const RoomList = (props: IFroomListData) => {
     show: false,
   });
   const [roomListData, roomListLoading, setRoomListData, setRoomListDataCache] =
-    useFetch<IFroomData>(`http://localhost:4040/room/roomlist`);
+    useFetch<IFroomData>(`http://localhost:4040/room/roomlist`, {
+      selected: false,
+    });
   const [newRoomHeading, setNewRoomHeading] = useState(`add new room`);
   const [selectedRoomData, setSelectedRoomData] = useState<IFroomData | null>(
     null
@@ -82,17 +84,13 @@ export const RoomList = (props: IFroomListData) => {
     });
   }
   function editNewRoom(roomData: IFroomData) {
-    const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
-      "userData"
-    ) as IFAuthData;
-    if (authData.userid !== roomData.userid) {
-      setRoomMsg(`You are not allowed to edit other people rooms`);
-      if (msgTimeOut) {
-        clearInterval(msgTimeOut);
-      }
-      msgTimeOut = setTimeout(() => {
-        setRoomMsg(``);
-      }, 2500);
+    // Auth token
+    if (
+      blockUserAction(
+        roomData,
+        `You are not allowed to edit other people rooms`
+      )
+    ) {
       return;
     }
     setRoomMode("UPDATE");
@@ -103,24 +101,62 @@ export const RoomList = (props: IFroomListData) => {
     });
   }
   /*
+    select any room
+  */
+  function selectAnyRoom(roomData: IFroomData, checked: boolean) {
+    // Auth token
+    if (
+      blockUserAction(
+        roomData,
+        `You are not allowed to select other people rooms`
+      )
+    ) {
+      return;
+    }
+    const updateRoomListData = roomListData.map((value) => {
+      return roomData.roomid === value.roomid
+        ? { ...value, selected: !!checked }
+        : value;
+    });
+    setRoomListDataCache(updateRoomListData);
+  }
+  /*
     delete a room
   */
-  function confirmDeleteRoom(roomData: IFroomData) {
-    // Auth token
+  function blockUserAction(roomData: IFroomData, msg: string = ``) {
     const authData: IFAuthData = LocalDataStorage.getObject<IFAuthData>(
       "userData"
     ) as IFAuthData;
     if (authData.userid !== roomData.userid) {
-      setRoomMsg(`You are not allowed to delete other people rooms`);
+      setRoomMsg(msg);
       if (msgTimeOut) {
         clearInterval(msgTimeOut);
       }
       msgTimeOut = setTimeout(() => {
         setRoomMsg(``);
       }, 2500);
+      return true;
+    }
+    return false;
+  }
+  function confirmDeleteRoom(roomData: IFroomData) {
+    // Auth token
+    if (
+      blockUserAction(
+        roomData,
+        `You are not allowed to delete other people rooms`
+      )
+    ) {
       return;
     }
+
     setSelectedRoomData(roomData);
+  }
+
+  // Delete multiple rooms only those who is created by user
+  function confrimDeleteMultipleRooms() {
+    console.log("confrim delete multiple rooms");
+    setSelectedRoomData({});
   }
   //  ALL ROOM LIST----------------------------------------------------------
   function displayAllRooms() {
@@ -145,10 +181,22 @@ export const RoomList = (props: IFroomListData) => {
                   >
                     Delete
                   </button>
-                  Select Room : <input type="checkbox"></input>
+                  Select Room :{" "}
+                  <input
+                    type="checkbox"
+                    checked={item.selected}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      selectAnyRoom(item, e.target.checked);
+                    }}
+                  ></input>
+                  {item.selected}
                 </div>
                 <div>
-                  <b>Parent Game : </b> : <span>{item.parentgame}</span>
+                  <b>Parent Game : </b> :{" "}
+                  <span>
+                    {item.parentgame}
+                    {item.selected}
+                  </span>
                 </div>
                 <div>
                   <b>Room Name : </b> {item.roomname}
@@ -170,7 +218,58 @@ export const RoomList = (props: IFroomListData) => {
       </>
     );
   }
+  function deleteMultiple() {
+    let roomids: Array<string | undefined> = [];
+    for (let i = 0; i < roomListData.length; i++) {
+      if (roomListData[i].selected) {
+        roomids.push(roomListData[i].roomid);
+      }
+    }
+    if (roomids.length <= 0) {
+      setRoomMsg(`How i can delete if i don't know what to delete`);
+      if (msgTimeOut) {
+        clearInterval(msgTimeOut);
+      }
+      msgTimeOut = setTimeout(() => {
+        setRoomMsg(``);
+        setSelectedRoomData(null);
+      }, 2500);
+      return;
+    }
+    const roomToDelete = {
+      roomids: roomids,
+      ACCESS_TOKEN: LocalDataStorage.getTokenFromCookie(`accessToken`),
+    };
+    pushDataToServer(
+      roomToDelete,
+      `http://localhost:4040/room/deletemany`,
+      (msg) => {
+        const roomListUpdatedData = roomListData.filter((data) => {
+          return !roomids.includes(data.roomid);
+        });
+        setRoomListDataCache(roomListUpdatedData);
+        const newMSg =
+          roomids.length > 1
+            ? `Rooms deleted from the server`
+            : `Rooms deleted from the server`;
+        setRoomMsg(newMSg);
+        setSelectedRoomData(null);
+        if (msgTimeOut) {
+          clearInterval(msgTimeOut);
+        }
+        msgTimeOut = setTimeout(() => {
+          setRoomMsg(``);
+        }, 2500);
+      }
+    );
+  }
   function deleteRoom() {
+    const keys = Object.keys(selectedRoomData as object);
+    // in case of multiple delete
+    if (!keys.length) {
+      deleteMultiple();
+      return;
+    }
     const roomToDelete = {
       roomid: selectedRoomData?.roomid as string,
       ACCESS_TOKEN: LocalDataStorage.getTokenFromCookie(`accessToken`),
@@ -212,7 +311,13 @@ export const RoomList = (props: IFroomListData) => {
 
   useEffect(() => {
     setShow(props.show);
-  }, [props.show]);
+  }, [
+    props.show,
+    roomListData,
+    roomListLoading,
+    setRoomListData,
+    setRoomListDataCache,
+  ]);
   return (
     <RoomListContext.Provider value={roomListState}>
       <div>
@@ -246,7 +351,7 @@ export const RoomList = (props: IFroomListData) => {
                 </button>
                 <button
                   onClick={() => {
-                    //deleteRoom();
+                    confrimDeleteMultipleRooms();
                   }}
                 >
                   Remove Room

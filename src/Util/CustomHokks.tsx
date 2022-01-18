@@ -2,12 +2,22 @@ import { useEffect, useState } from "react";
 
 import { fetchDataAuth } from "./dataService";
 
-export const useFetch = <T extends any>(url: string) => {
+export const useFetch = <T extends object>(
+  url: string,
+  partData: T | undefined = undefined
+) => {
   const [data, setData] = useState<Array<T>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const fetechData = async (url: string) => {
-    const apiData = await fetchDataAuth(url);
-    setData(apiData);
+    const apiData: Array<T> = await fetchDataAuth(url);
+    if (partData) {
+      const newApiData = apiData.map((value) => {
+        return { ...value, ...partData };
+      });
+      setData(newApiData);
+    } else {
+      setData(apiData);
+    }
   };
   useEffect(() => {
     fetechData(url);

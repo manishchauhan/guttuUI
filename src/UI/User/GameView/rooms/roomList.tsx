@@ -155,7 +155,6 @@ export const RoomList = (props: IFroomListData) => {
 
   // Delete multiple rooms only those who is created by user
   function confrimDeleteMultipleRooms() {
-    console.log("confrim delete multiple rooms");
     setSelectedRoomData({});
   }
   //  ALL ROOM LIST----------------------------------------------------------
@@ -218,13 +217,17 @@ export const RoomList = (props: IFroomListData) => {
       </>
     );
   }
-  function deleteMultiple() {
+  function collectSelectedRoomIDs() {
     let roomids: Array<string | undefined> = [];
     for (let i = 0; i < roomListData.length; i++) {
       if (roomListData[i].selected) {
         roomids.push(roomListData[i].roomid);
       }
     }
+    return roomids;
+  }
+  function deleteMultiple() {
+    const roomids = collectSelectedRoomIDs();
     if (roomids.length <= 0) {
       setRoomMsg(`How i can delete if i don't know what to delete`);
       if (msgTimeOut) {
@@ -351,7 +354,22 @@ export const RoomList = (props: IFroomListData) => {
                 </button>
                 <button
                   onClick={() => {
-                    confrimDeleteMultipleRooms();
+                    const roomids = collectSelectedRoomIDs();
+                    if (roomids.length > 0) {
+                      confrimDeleteMultipleRooms();
+                    } else {
+                      setRoomMsg(
+                        `How i can delete if i don't know what to delete`
+                      );
+                      if (msgTimeOut) {
+                        clearInterval(msgTimeOut);
+                      }
+                      msgTimeOut = setTimeout(() => {
+                        setRoomMsg(``);
+                        setSelectedRoomData(null);
+                      }, 2500);
+                      return;
+                    }
                   }}
                 >
                   Remove Room
